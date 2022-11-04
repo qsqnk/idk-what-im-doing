@@ -1,5 +1,12 @@
 package application
 
+import application.model.Command
+import application.utils.commandFilter
+import application.utils.excludeCommandsFilter
+import application.utils.getArgs
+import application.utils.getLogger
+import application.utils.send
+import application.utils.words
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.message
@@ -35,6 +42,21 @@ class TelegramPolling @Autowired constructor(
                     ?.joinToString("\n") { (i, message) -> "${i + 1}. ${message.content}" }
                     ?.let("Messages from $username:\n\n"::plus)
                     ?: "No messages from $username"
+                send(text)
+            }
+
+            message(commandFilter(Command.WORD_COUNT)) {
+                val username = getArgs().first()
+                val wordToCount = messageRepository
+                    .getBySender(username)
+                    .flatMap { it.content.words() }
+                    .groupingBy { it }
+                    .eachCount()
+                    .toList()
+                    .sortedByDescending { (_, count) -> count }
+                val text = wordToCount
+                    .joinToString("\n") { (word, count) -> "$word: $count" }
+                    .let("Words used by $username:\n\n"::plus)
                 send(text)
             }
         }

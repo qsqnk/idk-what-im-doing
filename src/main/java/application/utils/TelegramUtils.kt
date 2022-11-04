@@ -1,5 +1,6 @@
-package application
+package application.utils
 
+import application.model.Command
 import com.github.kotlintelegrambot.dispatcher.handlers.MessageHandlerEnvironment
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.extensions.filters.Filter
@@ -13,25 +14,18 @@ fun MessageHandlerEnvironment.send(text: String) {
 
 fun MessageHandlerEnvironment.getArgs() =
     message.text
-        .orEmpty()
-        .split(" ")
+        .words()
         .drop(1)
 
 fun commandFilter(command: Command) =
     Filter.Custom {
-        text.orEmpty()
+        text.words()
             .run {
-                startsWith(command.lowercaseName())
-                    && split(" ").size - 1 == command.argCount
+                firstOrNull() == command.lowercaseName() && size == command.argCount + 1
             }
     }
 
 fun excludeCommandsFilter(vararg commands: Command) =
     commands
-        .map { messageWithPrefix(it.lowercaseName()).not() }
-        .reduce(Filter::and)
-
-fun messageWithPrefix(prefix: String) =
-    Filter.Custom {
-        text.orEmpty().startsWith(prefix)
-    }
+        .map { commandFilter(it).not() }
+        .fold(Filter.All, Filter::and)
