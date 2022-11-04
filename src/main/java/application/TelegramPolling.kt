@@ -3,7 +3,6 @@ package application
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.message
-import com.github.kotlintelegrambot.extensions.filters.Filter
 import domain.model.MessageCreateRq
 import domain.repository.MessageRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,20 +19,14 @@ class TelegramPolling @Autowired constructor(
     private val bot = bot {
         token = telegramBotToken
         dispatch {
-            message(
-                Filter.All.and(
-                    lowercaseNamesOf<Command>()
-                        .map { messageWithPrefix(it).not() }
-                        .reduce(Filter::and)
-                )
-            ) {
+            message(excludeCommandsFilter(*Command.values())) {
                 val content = message.text ?: return@message
                 val sender = message.from?.username ?: return@message
                 MessageCreateRq(content = content, sender = sender)
                     .let { messageRepository.save(it) }
             }
 
-            message(commandFilter(Command.GET.lowercaseName(), argCount = 1)) {
+            message(commandFilter(Command.GET)) {
                 val username = getArgs().first()
                 val text = messageRepository
                     .getBySender(username)

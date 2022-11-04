@@ -17,14 +17,21 @@ fun MessageHandlerEnvironment.getArgs() =
         .split(" ")
         .drop(1)
 
-fun commandFilter(command: String, argCount: Int) = Filter.Custom {
-    text
-        .orEmpty()
-        .run { startsWith(command) && split(" ").size - 1 == argCount }
-}
+fun commandFilter(command: Command) =
+    Filter.Custom {
+        text.orEmpty()
+            .run {
+                startsWith(command.lowercaseName())
+                    && split(" ").size - 1 == command.argCount
+            }
+    }
 
-fun messageWithPrefix(prefix: String) = Filter.Custom {
-    text
-        .orEmpty()
-        .startsWith(prefix)
-}
+fun excludeCommandsFilter(vararg commands: Command) =
+    commands
+        .map { messageWithPrefix(it.lowercaseName()).not() }
+        .reduce(Filter::and)
+
+fun messageWithPrefix(prefix: String) =
+    Filter.Custom {
+        text.orEmpty().startsWith(prefix)
+    }
