@@ -8,4 +8,4 @@ inline fun <reified T> T.getLogger() = LoggerFactory.getLogger(
 
 inline fun <reified T : Enum<T>> lowercaseNamesOf() = enumValues<T>().map { it.name.lowercase() }
 
-fun <T : Enum<T>> T.lowercaseName() = name.lowercase()
+fun Enum<*>.lowercaseName() = name.lowercase()
