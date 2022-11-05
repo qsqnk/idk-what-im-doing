@@ -20,9 +20,10 @@ class MessageRepositoryImpl @Autowired constructor(
             .fetchOne()?.id
     }
 
-    override fun getBySender(sender: String): List<Message> {
+    override fun get(sender: String, chatId: Long): List<Message> {
         return sql.selectFrom(MESSAGE)
             .where(MESSAGE.SENDER.eq(sender))
+            .and(MESSAGE.CHAT_ID.eq(chatId))
             .fetch(::toModel)
     }
 
@@ -34,12 +35,14 @@ class MessageRepositoryImpl @Autowired constructor(
     companion object {
         private fun toModel(record: MessageRecord) = Message(
             id = record.id,
+            chatId = record.chatId,
             sender = record.sender,
             content = record.content,
         )
 
         private fun toRecord(message: MessageCreateRq) = MessageRecord().apply {
             sender = message.sender
+            chatId = message.chatId
             content = message.content
         }
     }

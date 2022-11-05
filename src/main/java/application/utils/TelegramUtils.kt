@@ -5,9 +5,12 @@ import com.github.kotlintelegrambot.dispatcher.handlers.MessageHandlerEnvironmen
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.extensions.filters.Filter
 
+fun MessageHandlerEnvironment.chatId() =
+    message.chat.id
+
 fun MessageHandlerEnvironment.send(text: String) {
     bot.sendMessage(
-        chatId = ChatId.fromId(message.chat.id),
+        chatId = ChatId.fromId(chatId()),
         text = text,
     )
 }

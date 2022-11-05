@@ -1,6 +1,7 @@
 package application
 
 import application.model.Command
+import application.utils.chatId
 import application.utils.commandFilter
 import application.utils.excludeCommandsFilter
 import application.utils.getArgs
@@ -12,6 +13,7 @@ import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.Dispatcher
 import com.github.kotlintelegrambot.dispatcher.message
+import com.github.kotlintelegrambot.entities.ChatId
 import domain.model.MessageCreateRq
 import domain.repository.MessageRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,7 +23,7 @@ import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
 
 @Component
-class TelegramPolling @Autowired constructor(
+class TelegramBot @Autowired constructor(
     private val messageRepository: MessageRepository,
     @Value("\${telegram.bot.token:}") private val telegramBotToken: String,
 ) {
@@ -35,11 +37,18 @@ class TelegramPolling @Autowired constructor(
         }
     }
 
+    fun send(content: String, chatId: Long) {
+        bot.sendMessage(
+            chatId = ChatId.fromId(chatId),
+            text = content,
+        )
+    }
+
     private fun Dispatcher.messageHandler() {
         message(excludeCommandsFilter(*Command.values())) {
             val content = message.text ?: return@message
             val sender = message.from?.username ?: return@message
-            MessageCreateRq(content = content, sender = sender)
+            MessageCreateRq(content = content, sender = sender, chatId = chatId())
                 .let { messageRepository.save(it) }
         }
     }
@@ -48,7 +57,7 @@ class TelegramPolling @Autowired constructor(
         message(commandFilter(Command.GET)) {
             val username = getArgs().first()
             val text = messageRepository
-                .getBySender(username)
+                .get(username, chatId())
                 .takeIf { it.isNotEmpty() }
                 ?.withIndex()
                 ?.joinToString("\n") { (i, message) -> "${i + 1}. ${message.content}" }
@@ -62,7 +71,7 @@ class TelegramPolling @Autowired constructor(
         message(commandFilter(Command.WORD_COUNT)) {
             val username = getArgs().first()
             val wordToCount = messageRepository
-                .getBySender(username)
+                .get(username, chatId())
                 .flatMap { it.content.words() }
                 .groupingBy { it }
                 .eachCount()

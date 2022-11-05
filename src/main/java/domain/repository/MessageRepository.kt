@@ -6,7 +6,7 @@ import domain.model.MessageCreateRq
 interface MessageRepository {
     fun save(message: MessageCreateRq): Long?
 
-    fun getBySender(sender: String): List<Message>
+    fun get(sender: String, chatId: Long): List<Message>
 
     fun getAll(): List<Message>
 }
