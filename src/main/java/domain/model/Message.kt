@@ -5,4 +5,5 @@ data class Message(
     val chatId: Long,
     val sender: String,
     val content: String,
+    val createdTs: Long,
 )

@@ -38,12 +38,14 @@ class MessageRepositoryImpl @Autowired constructor(
             chatId = record.chatId,
             sender = record.sender,
             content = record.content,
+            createdTs = record.createdTs,
         )
 
         private fun toRecord(message: MessageCreateRq) = MessageRecord().apply {
             sender = message.sender
             chatId = message.chatId
             content = message.content
+            createdTs = System.currentTimeMillis()
         }
     }
 }

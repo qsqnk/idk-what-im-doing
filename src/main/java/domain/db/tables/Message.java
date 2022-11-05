@@ -16,7 +16,7 @@ import org.jooq.ForeignKey;
 import org.jooq.Identity;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row4;
+import org.jooq.Row5;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -67,6 +67,11 @@ public class Message extends TableImpl<MessageRecord> {
      * The column <code>public.message.chat_id</code>.
      */
     public final TableField<MessageRecord, Long> CHAT_ID = createField(DSL.name("chat_id"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.message.created_ts</code>.
+     */
+    public final TableField<MessageRecord, Long> CREATED_TS = createField(DSL.name("created_ts"), SQLDataType.BIGINT, this, "");
 
     private Message(Name alias, Table<MessageRecord> aliased) {
         this(alias, aliased, null);
@@ -148,11 +153,11 @@ public class Message extends TableImpl<MessageRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row4 type methods
+    // Row5 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row4<Long, String, String, Long> fieldsRow() {
-        return (Row4) super.fieldsRow();
+    public Row5<Long, String, String, Long, Long> fieldsRow() {
+        return (Row5) super.fieldsRow();
     }
 }
