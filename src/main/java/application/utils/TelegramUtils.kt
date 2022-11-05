@@ -14,14 +14,19 @@ fun MessageHandlerEnvironment.send(text: String) {
 
 fun MessageHandlerEnvironment.getArgs() =
     message.text
+        ?.trim()
         .words()
         .drop(1)
+
+fun MessageHandlerEnvironment.textAfterCommand() =
+    getArgs().joinToString(" ")
 
 fun commandFilter(command: Command) =
     Filter.Custom {
         text.words()
             .run {
-                firstOrNull() == command.lowercaseName() && size == command.argCount + 1
+                firstOrNull() == command.lowercaseName() &&
+                    (command.argCount == null || command.argCount == size - 1)
             }
     }
 
