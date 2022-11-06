@@ -15,8 +15,7 @@ class InvertedIndexRepositoryImpl @Autowired constructor(
     override fun save(entries: List<InvertedIndexEntry>) {
         entries
             .map(::toRecord)
-            .map { sql.insertInto(INVERTED_INDEX).set(it) }
-            .let { sql.batch(it) }
+            .let(sql::batchInsert)
             .execute()
     }
 
