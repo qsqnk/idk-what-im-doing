@@ -27,6 +27,12 @@ class MessageRepositoryImpl @Autowired constructor(
             .fetch(::toModel)
     }
 
+    override fun get(messageIds: List<Long>): List<Message> {
+        return sql.selectFrom(MESSAGE)
+            .where(MESSAGE.ID.`in`(messageIds))
+            .fetch(::toModel)
+    }
+
     override fun getAll(): List<Message> {
         return sql.selectFrom(MESSAGE)
             .fetch(::toModel)

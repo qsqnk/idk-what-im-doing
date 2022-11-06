@@ -5,6 +5,7 @@ package domain.db;
 
 
 import domain.db.tables.FlywaySchemaHistory;
+import domain.db.tables.InvertedIndex;
 import domain.db.tables.Message;
 
 import java.util.Arrays;
@@ -35,6 +36,11 @@ public class Public extends SchemaImpl {
     public final FlywaySchemaHistory FLYWAY_SCHEMA_HISTORY = FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY;
 
     /**
+     * The table <code>public.inverted_index</code>.
+     */
+    public final InvertedIndex INVERTED_INDEX = InvertedIndex.INVERTED_INDEX;
+
+    /**
      * The table <code>public.message</code>.
      */
     public final Message MESSAGE = Message.MESSAGE;
@@ -62,6 +68,7 @@ public class Public extends SchemaImpl {
     public final List<Table<?>> getTables() {
         return Arrays.<Table<?>>asList(
             FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY,
+            InvertedIndex.INVERTED_INDEX,
             Message.MESSAGE);
     }
 }

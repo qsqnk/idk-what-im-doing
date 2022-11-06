@@ -14,7 +14,9 @@ import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.Dispatcher
 import com.github.kotlintelegrambot.dispatcher.message
 import com.github.kotlintelegrambot.entities.ChatId
+import domain.model.InvertedIndexEntry
 import domain.model.MessageCreateRq
+import domain.repository.InvertedIndexRepository
 import domain.repository.MessageRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -25,6 +27,7 @@ import javax.annotation.PreDestroy
 @Component
 class TelegramBot @Autowired constructor(
     private val messageRepository: MessageRepository,
+    private val invertedIndexRepository: InvertedIndexRepository,
     @Value("\${telegram.bot.token:}") private val telegramBotToken: String,
 ) {
     private val bot = bot {
@@ -33,7 +36,8 @@ class TelegramBot @Autowired constructor(
             messageHandler()
             commandGetHandler()
             commandWordCountHandler()
-            questionHandler()
+            commandQuestionHandler()
+            commandFindMessageHandler()
         }
     }
 
@@ -48,8 +52,31 @@ class TelegramBot @Autowired constructor(
         message(excludeCommandsFilter(*Command.values())) {
             val content = message.text ?: return@message
             val sender = message.from?.username ?: return@message
-            MessageCreateRq(content = content, sender = sender, chatId = chatId())
-                .let { messageRepository.save(it) }
+
+            val messageId = MessageCreateRq(
+                content = content,
+                sender = sender,
+                chatId = chatId()
+            ).let { messageRepository.save(it) } ?: return@message
+
+            content
+                .lowercase()
+                .words()
+                .map { InvertedIndexEntry(it, messageId) }
+                .let { invertedIndexRepository.save(it) }
+        }
+    }
+
+    private fun Dispatcher.commandFindMessageHandler() {
+        message(commandFilter(Command.FIND_MESSAGE)) {
+            val word = getArgs().first().lowercase()
+            val text = invertedIndexRepository
+                .getMessageIds(word)
+                .let { messageRepository.get(it) }
+                .withIndex()
+                .joinToString("\n") { (i, m) -> "${i + 1}. ${m.sender}: ${m.content}" }
+                .let("Found messages by word $word:\n\n"::plus)
+            send(text)
         }
     }
 
@@ -84,7 +111,7 @@ class TelegramBot @Autowired constructor(
         }
     }
 
-    private fun Dispatcher.questionHandler() {
+    private fun Dispatcher.commandQuestionHandler() {
         message(commandFilter(Command.QUESTION)) {
             val question = textAfterCommand()
                 .removeSuffix("?")

@@ -5,8 +5,10 @@ package domain.db;
 
 
 import domain.db.tables.FlywaySchemaHistory;
+import domain.db.tables.InvertedIndex;
 import domain.db.tables.Message;
 import domain.db.tables.records.FlywaySchemaHistoryRecord;
+import domain.db.tables.records.InvertedIndexRecord;
 import domain.db.tables.records.MessageRecord;
 
 import org.jooq.TableField;
@@ -27,5 +29,6 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final UniqueKey<FlywaySchemaHistoryRecord> FLYWAY_SCHEMA_HISTORY_PK = Internal.createUniqueKey(FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY, DSL.name("flyway_schema_history_pk"), new TableField[] { FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY.INSTALLED_RANK }, true);
+    public static final UniqueKey<InvertedIndexRecord> INVERTED_INDEX_PKEY = Internal.createUniqueKey(InvertedIndex.INVERTED_INDEX, DSL.name("inverted_index_pkey"), new TableField[] { InvertedIndex.INVERTED_INDEX.WORD, InvertedIndex.INVERTED_INDEX.MESSAGE_ID }, true);
     public static final UniqueKey<MessageRecord> MESSAGE_PKEY = Internal.createUniqueKey(Message.MESSAGE, DSL.name("message_pkey"), new TableField[] { Message.MESSAGE.ID }, true);
 }

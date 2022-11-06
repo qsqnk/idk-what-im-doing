@@ -37,3 +37,4 @@ fun excludeCommandsFilter(vararg commands: Command) =
     commands
         .map { commandFilter(it).not() }
         .fold(Filter.All, Filter::and)
+

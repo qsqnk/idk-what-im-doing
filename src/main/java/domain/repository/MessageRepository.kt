@@ -8,5 +8,7 @@ interface MessageRepository {
 
     fun get(sender: String, chatId: Long): List<Message>
 
+    fun get(messageIds: List<Long>): List<Message>
+
     fun getAll(): List<Message>
 }
